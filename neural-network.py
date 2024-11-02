@@ -6,6 +6,13 @@ nnfs.init()
 
 
 class LayerDense:
+    """
+    Defines a dense (fully connected) layer with weights and biases, 
+    which takes n_inputs inputs and produces n_neurons outputs. 
+    The forward method computes the output for a batch of inputs 
+    by taking the dot product of inputs and weights and adding biases.
+    """
+
     def __init__(self, n_inputs, n_neurons):
         self.weights = 0.10 * np.random.randn(n_inputs, n_neurons)
         self.biases = np.zeros((1, n_neurons))
@@ -15,11 +22,25 @@ class LayerDense:
 
 
 class ActivationReLu:
+    """
+    Implements the ReLU activation function, 
+    which sets any negative values in the input to zero, 
+    leaving positive values unchanged. 
+    ReLU is commonly used in hidden layers for introducing non-linearity.
+    """
+
     def forward(self, inputs):
         self.output = np.maximum(0, inputs)
 
 
 class ActivationSoftMax:
+    """
+    This activation function is applied to the output layer of the network 
+    to convert the raw output values into probabilities, 
+    which are useful for classification tasks. It exponentiates each output, 
+    normalizes by the total sum, and prevents overflow by subtracting the maximum value from inputs.
+    """
+
     def forward(self, inputs):
         # prevent an overflow
         exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
@@ -28,6 +49,10 @@ class ActivationSoftMax:
 
 
 class Loss:
+    """
+    The base Loss class includes a method to compute the mean loss over a batch.
+    """
+
     def calculate(self, output, y):
         sample_losses = self.forward(output, y)
         data_loss = np.mean(sample_losses)
@@ -35,6 +60,12 @@ class Loss:
 
 
 class LossCategoricalCrossentropy(Loss):
+    """
+    Calculates the categorical cross-entropy loss, suitable for multi-class classification. 
+    It calculates the negative log likelihood of the true class probabilities, 
+    providing a measure of the network’s accuracy in classifying the input samples.
+    """
+
     def forward(self, y_pred, y_true):
         samples = len(y_pred)
         # Clip values to avoid zeros
