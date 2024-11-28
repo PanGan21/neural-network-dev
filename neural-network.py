@@ -232,8 +232,16 @@ class ActivationSoftmaxLossCategoricalCrossentropy():
 
 # SGD optimizer
 class OptimizerSGD:
-    # Initialize optimizer - set settings,
-    # learning rate of 1. is default for this optimizer
+    """
+    Stochastic Gradient Descent (SGD) Optimizer.
+
+    This optimizer updates model parameters using the gradients calculated during backpropagation. 
+    The update is scaled by the learning rate, which determines the step size in the parameter space.
+
+    args:
+        learning_rate (float): The scaling factor for parameter updates. Default is 1.0.
+    """
+
     def __init__(self, learning_rate=1.0):
         self.learning_rate = learning_rate
 
