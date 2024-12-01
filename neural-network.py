@@ -242,13 +242,28 @@ class OptimizerSGD:
         learning_rate (float): The scaling factor for parameter updates. Default is 1.0.
     """
 
-    def __init__(self, learning_rate=1.0):
+    # Initialize optimizer - set settings,
+    # learning rate of 1. is default for this optimizer
+    def __init__(self, learning_rate=1.0, decay=0.):
         self.learning_rate = learning_rate
+        self.current_learning_rate = learning_rate
+        self.decay = decay
+        self.iterations = 0
 
-    # Update parameters
+    # Call once before any pamater updates
+    def pre_update_params(self):
+        if self.decay:
+            self.current_learning_rate = self.learning_rate * \
+                (1. / (1. + self.decay * self.iterations))
+
+        # Update parameters
     def update_params(self, layer):
         layer.weights += -self.learning_rate * layer.dweights
         layer.biases += -self.learning_rate * layer.dbiases
+
+    # Call once after any patameter updates
+    def post_update_params(self):
+        self.iterations += 1
 
 
 # Create dataset
@@ -268,7 +283,7 @@ dense2 = LayerDense(64, 3)
 loss_activation = ActivationSoftmaxLossCategoricalCrossentropy()
 
 # Create optimizer
-optimizer = OptimizerSGD(learning_rate=.85)
+optimizer = OptimizerSGD(decay=1e-3)
 
 # Train in loop
 for epoch in range(10001):
@@ -296,7 +311,9 @@ for epoch in range(10001):
 
     if not epoch % 100:
         print(f'epoch: {epoch}, ' +
-              f'acc: {accuracy:.3f}, ' + f'loss: {loss:.3f}')
+              f'acc: {accuracy:.3f}, ' +
+              f'loss: {loss:.3f}, ' +
+              f'lr: {optimizer.current_learning_rate}')
 
     # Backward pass
     loss_activation.backward(loss_activation.output, y)
@@ -304,5 +321,8 @@ for epoch in range(10001):
     activation1.backward(dense2.dinputs)
     dense1.backward(activation1.dinputs)
 
+    # Update weights and biases
+    optimizer.pre_update_params()
     optimizer.update_params(dense1)
     optimizer.update_params(dense2)
+    optimizer.post_update_params()
