@@ -297,6 +297,19 @@ class OptimizerSGD:
 
 
 class OptimizerAdagrad:
+    """
+    Implements the Adagrad optimization algorithm.
+
+    Attributes:
+        learning_rate (float): Initial learning rate for the optimizer.
+        decay (float): Learning rate decay factor. Controls how the learning rate
+                       decreases over time.
+        epsilon (float): Small value added to the denominator to prevent division
+                         by zero during updates.
+        current_learning_rate (float): Adjusted learning rate considering decay.
+        iterations (int): Counter for the number of parameter updates.
+    """
+
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=1., decay=0., epsilon=1e-7):
         self.learning_rate = learning_rate
