@@ -349,6 +349,22 @@ class OptimizerAdagrad:
 
 
 class OptimizerRMSProp:
+    """
+    Implements the RMSProp optimization algorithm.
+
+    RMSProp is an adaptive learning rate method that adjusts the learning rate 
+    based on the moving average of the squared gradients, helping to mitigate 
+    the problem of vanishing or exploding gradients.
+
+    Attributes:
+        learning_rate (float): Initial learning rate for the optimizer.
+        current_learning_rate (float): Current learning rate after applying decay.
+        decay (float): Decay rate for the learning rate.
+        iterations (int): Number of parameter updates performed.
+        epsilon (float): Small value to prevent division by zero during updates.
+        rho (float): Decay rate for the moving average of squared gradients.
+    """
+
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=0.001, decay=0., epsilon=1e-7, rho=0.9):
         self.learning_rate = learning_rate
