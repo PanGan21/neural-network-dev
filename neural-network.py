@@ -235,7 +235,7 @@ class OptimizerSGD:
     """
     Stochastic Gradient Descent (SGD) Optimizer.
 
-    This optimizer updates model parameters using the gradients calculated during backpropagation. 
+    This optimizer updates model parameters using the gradients calculated during backpropagation.
     The update is scaled by the learning rate, which determines the step size in the parameter space.
 
     args:
@@ -352,8 +352,8 @@ class OptimizerRMSProp:
     """
     Implements the RMSProp optimization algorithm.
 
-    RMSProp is an adaptive learning rate method that adjusts the learning rate 
-    based on the moving average of the squared gradients, helping to mitigate 
+    RMSProp is an adaptive learning rate method that adjusts the learning rate
+    based on the moving average of the squared gradients, helping to mitigate
     the problem of vanishing or exploding gradients.
 
     Attributes:
@@ -410,9 +410,9 @@ class OptimizerAdam:
     """
     Implements the Adam optimization algorithm.
 
-    Adam combines the advantages of two other extensions of stochastic gradient descent: 
+    Adam combines the advantages of two other extensions of stochastic gradient descent:
     adaptive gradient algorithm (AdaGrad) and root mean square propagation (RMSProp).
-    It adapts the learning rate for each parameter by using estimates of the first 
+    It adapts the learning rate for each parameter by using estimates of the first
     and second moments of the gradients.
 
     Attributes:
@@ -554,3 +554,33 @@ for epoch in range(10001):
     optimizer.update_params(dense1)
     optimizer.update_params(dense2)
     optimizer.post_update_params()
+
+
+# Validate the model
+
+# Create test dataset
+X_test, y_test = spiral_data(samples=100, classes=3)
+
+# Perform a forward pass of our testing data through this layer
+dense1.forward(X_test)
+
+# Perform a forward pass through activation function
+# takes the output of first dense layer here
+activation1.forward(dense1.output)
+
+# Perform a forward pass through second Dense layer
+# takes outputs of activation function of first layer as inputs
+dense2.forward(activation1.output)
+
+# Perform a forward pass through the activation/loss function
+# takes the output of second dense layer here and returns loss
+loss = loss_activation.forward(dense2.output, y_test)
+
+# Calculate accuracy from output of activation2 and targets
+# calculate values along first axis
+predictions = np.argmax(loss_activation.output, axis=1)
+if len(y_test.shape) == 2:
+    y_test = np.argmax(y_test, axis=1)
+accuracy = np.mean(predictions == y_test)
+
+print(f'validation, acc: {accuracy:.3f}, loss: {loss:.3f}')
