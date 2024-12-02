@@ -407,6 +407,24 @@ class OptimizerRMSProp:
 
 
 class OptimizerAdam:
+    """
+    Implements the Adam optimization algorithm.
+
+    Adam combines the advantages of two other extensions of stochastic gradient descent: 
+    adaptive gradient algorithm (AdaGrad) and root mean square propagation (RMSProp).
+    It adapts the learning rate for each parameter by using estimates of the first 
+    and second moments of the gradients.
+
+    Attributes:
+        learning_rate (float): Initial learning rate for the optimizer.
+        current_learning_rate (float): Current learning rate after applying decay.
+        decay (float): Decay rate for the learning rate.
+        iterations (int): Number of parameter updates performed.
+        epsilon (float): Small value to prevent division by zero during updates.
+        beta_1 (float): Decay rate for the first moment estimate.
+        beta_2 (float): Decay rate for the second moment estimate.
+    """
+
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=0.001, decay=0., epsilon=1e-7, beta_1=0.9, beta_2=0.999):
         self.learning_rate = learning_rate
