@@ -12,11 +12,15 @@ class LayerDense:
     Attributes:
         weights (ndarray): Weight matrix for the layer.
         biases (ndarray): Bias vector for the layer.
-        inputs (ndarray): Inputs to the layer during forward pass.
-        output (ndarray): Output of the layer during forward pass.
-        dweights (ndarray): Gradient of weights during backward pass.
-        dbiases (ndarray): Gradient of biases during backward pass.
-        dinputs (ndarray): Gradient of inputs during backward pass.
+        inputs (ndarray): Inputs to the layer during the forward pass.
+        output (ndarray): Output of the layer during the forward pass.
+        dweights (ndarray): Gradient of weights during the backward pass.
+        dbiases (ndarray): Gradient of biases during the backward pass.
+        dinputs (ndarray): Gradient of inputs during the backward pass.
+        weight_regularizer_l1 (float): L1 regularization strength for weights.
+        weight_regularizer_l2 (float): L2 regularization strength for weights.
+        bias_regularizer_l1 (float): L1 regularization strength for biases.
+        bias_regularizer_l2 (float): L2 regularization strength for biases.
     """
 
     # Layer initialization
