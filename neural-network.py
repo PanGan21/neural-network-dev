@@ -19,25 +19,19 @@ class LayerDense:
         dinputs (ndarray): Gradient of inputs during backward pass.
     """
 
-    def __init__(self, n_inputs, n_neurons):
-        """
-        Initializes weights and biases for the dense layer.
-
-        Args:
-            n_inputs (int): Number of input features.
-            n_neurons (int): Number of neurons in the layer.
-        """
+    # Layer initialization
+    def __init__(self, n_inputs, n_neurons, weight_regularizer_l1=0, weight_regularizer_l2=0, bias_regularizer_l1=0, bias_regularizer_l2=0):
+        # Initialize weights and biases
         self.weights = 0.10 * np.random.randn(n_inputs, n_neurons)
         self.biases = np.zeros((1, n_neurons))
+        # Set regularization strength
+        self.weight_regularizer_l1 = weight_regularizer_l1
+        self.weight_regularizer_l2 = weight_regularizer_l2
+        self.bias_regularizer_l1 = bias_regularizer_l1
+        self.bias_regularizer_l2 = bias_regularizer_l2
 
     # Forward pass
     def forward(self, inputs):
-        """
-        Performs the forward pass of the dense layer.
-
-        Args:
-            inputs (ndarray): Input data or outputs from the previous layer.
-        """
         # Remember input values
         self.inputs = inputs
         # Calculate output values from inputs, weights and biases
@@ -45,15 +39,32 @@ class LayerDense:
 
     # Backward pass
     def backward(self, dvalues):
-        """
-        Performs the backward pass of the dense layer.
-
-        Args:
-            dvalues (ndarray): Gradients of the loss with respect to the layer's output.
-        """
         # Gradients on parameters
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+
+        # Gradients on regularization
+        # L1 on weights
+        if self.weight_regularizer_l1 > 0:
+            dL1 = np.ones_like(self.weights)
+            dL1[self.weights < 0] = -1
+            self.dweights += self.weight_regularizer_l1 * dL1
+
+        # L2 on weights
+        if self.weight_regularizer_l2 > 0:
+            self.dweights += 2 * self.weight_regularizer_l2 * self.weights
+
+        # L1 on biases
+        if self.bias_regularizer_l1 > 0:
+            dL1 = np.ones_like(self.biases)
+            dL1[self.biases < 0] = -1
+            self.dbiases += self.bias_regularizer_l1 * dL1
+
+        # L2 on biases
+        if self.bias_regularizer_l2 > 0:
+            self.dbiases += 2 * self.bias_regularizer_l2 * \
+                self.biases
+
         # Gradient on values
         self.dinputs = np.dot(dvalues, self.weights.T)
 
@@ -149,10 +160,38 @@ class Loss:
         calculate: Computes the mean loss over a batch of samples.
     """
 
+    # Calculate loss
     def calculate(self, output, y):
         sample_losses = self.forward(output, y)
         data_loss = np.mean(sample_losses)
         return data_loss
+
+    # Regularization loss calculation
+    def regularization_loss(self, layer):
+        # 0 by default
+        regularization_loss = 0
+
+        # L1 regularization - weights
+        # calculate only when factor greater than 0
+        if layer.weight_regularizer_l1 > 0:
+            regularization_loss += layer.weight_regularizer_l1 * \
+                np.sum(np.abs(layer.weights))
+        # L2 regularization - weights
+        if layer.weight_regularizer_l2 > 0:
+            regularization_loss += layer.weight_regularizer_l2 * \
+                np.sum(layer.weights *
+                       layer.weights)
+        # L1 regularization - biases
+        # calculate only when factor greater than 0
+        if layer.bias_regularizer_l1 > 0:
+            regularization_loss += layer.bias_regularizer_l1 * \
+                np.sum(np.abs(layer.biases))
+        # L2 regularization - biases
+        if layer.bias_regularizer_l2 > 0:
+            regularization_loss += layer.bias_regularizer_l2 * \
+                np.sum(layer.biases *
+                       layer.biases)
+        return regularization_loss
 
 
 class LossCategoricalCrossentropy(Loss):
@@ -494,8 +533,9 @@ class OptimizerAdam:
 # Create dataset
 X, y = spiral_data(samples=100, classes=3)
 
-# Create Dense layer with 2 input features and 3 output values
-dense1 = LayerDense(2, 64)
+# Create Dense layer with 2 input features and 64 output values
+dense1 = LayerDense(2, 64, weight_regularizer_l2=5e-4,
+                    bias_regularizer_l2=5e-4)
 
 # Create ReLU activation (to be used with Dense layer):
 activation1 = ActivationReLu()
@@ -528,7 +568,15 @@ for epoch in range(10001):
 
     # Perform a forward pass through the activation/loss function
     # takes the output of second dense layer here and returns loss
-    loss = loss_activation.forward(dense2.output, y)
+    data_loss = loss_activation.forward(dense2.output, y)
+
+    # Calculate regularization penalty
+    regularization_loss = \
+        loss_activation.loss.regularization_loss(dense1) + \
+        loss_activation.loss.regularization_loss(dense2)
+
+    # Calculate overall loss
+    loss = data_loss + regularization_loss
 
     # Calculate accuracy from output of activation2 and targets
     # calculate values along first axis
@@ -540,7 +588,9 @@ for epoch in range(10001):
     if not epoch % 100:
         print(f'epoch: {epoch}, ' +
               f'acc: {accuracy:.3f}, ' +
-              f'loss: {loss:.3f}, ' +
+              f'loss: {loss:.3f} (' +
+              f'data_loss: {data_loss:.3f}, ' +
+              f'reg_loss: {regularization_loss:.3f}), ' +
               f'lr: {optimizer.current_learning_rate}')
 
     # Backward pass
