@@ -535,7 +535,7 @@ class OptimizerAdam:
 
 
 # Create dataset
-X, y = spiral_data(samples=100, classes=3)
+X, y = spiral_data(samples=1000, classes=3)
 
 # Create Dense layer with 2 input features and 64 output values
 dense1 = LayerDense(2, 64, weight_regularizer_l2=5e-4,
