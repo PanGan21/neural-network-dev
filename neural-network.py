@@ -534,6 +534,25 @@ class OptimizerAdam:
         self.iterations += 1
 
 
+class LayerDropout:
+    def __init__(self, rate):
+        # Store rate, we invert it as for example for dropout # of 0.1 we need success rate of 0.9
+        self.rate = 1 - rate
+
+    def forward(self, inputs):
+        # Save input values
+        self.inputs = inputs
+        # Generate and save scaled mask
+        self.binary_mask = np.random.binomial(
+            1, self.rate, size=inputs.shape) / self.rate
+        # Apply mask to output values
+        self.output = inputs * self.binary_mask
+
+    def backward(self, dvalues):
+        # Gradient on values
+        self.dinputs = dvalues * self.binary_mask
+
+
 # Create dataset
 X, y = spiral_data(samples=1000, classes=3)
 
@@ -543,6 +562,9 @@ dense1 = LayerDense(2, 512, weight_regularizer_l2=5e-4,
 
 # Create ReLU activation (to be used with Dense layer):
 activation1 = ActivationReLu()
+
+# Create dropout layer
+dropout1 = LayerDropout(0.1)
 
 # Create second Dense layer with 3 input features (as we take output
 # of previous layer here) and 3 output values (output values)
@@ -555,7 +577,7 @@ loss_activation = ActivationSoftmaxLossCategoricalCrossentropy()
 # optimizer = OptimizerSGD(decay=1e-3, momentum=0.9)
 # optimizer = OptimizerAdagrad(decay=1e-4)
 # optimizer = OptimizerRMSProp(decay=1e-4)
-optimizer = OptimizerAdam(learning_rate=0.05, decay=1e-5)
+optimizer = OptimizerAdam(learning_rate=0.05, decay=5e-5)
 
 # Train in loop
 for epoch in range(10001):
@@ -566,9 +588,12 @@ for epoch in range(10001):
     # takes the output of first dense layer here
     activation1.forward(dense1.output)
 
+    # Perform a forward pass through Dropout layer
+    dropout1.forward(activation1.output)
+
     # Perform a forward pass through second Dense layer
     # takes outputs of activation function of first layer as inputs
-    dense2.forward(activation1.output)
+    dense2.forward(dropout1.output)
 
     # Perform a forward pass through the activation/loss function
     # takes the output of second dense layer here and returns loss
@@ -600,7 +625,8 @@ for epoch in range(10001):
     # Backward pass
     loss_activation.backward(loss_activation.output, y)
     dense2.backward(loss_activation.dinputs)
-    activation1.backward(dense2.dinputs)
+    dropout1.backward(dense2.dinputs)
+    activation1.backward(dropout1.dinputs)
     dense1.backward(activation1.dinputs)
 
     # Update weights and biases
