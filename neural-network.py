@@ -535,6 +535,18 @@ class OptimizerAdam:
 
 
 class LayerDropout:
+    """
+    A class that implements the Dropout regularization technique to reduce overfitting in neural networks.
+
+    Attributes:
+        rate (float): The probability of dropping a unit during training. This is stored as `1 - rate` to represent the 
+                     probability of keeping a unit active.
+        inputs (numpy.ndarray): The input values received during the forward pass.
+        binary_mask (numpy.ndarray): A mask generated during the forward pass, determining which inputs to drop.
+        output (numpy.ndarray): The output values after applying the dropout mask.
+        dinputs (numpy.ndarray): The gradients of the loss with respect to the inputs, calculated during the backward pass.
+    """
+
     def __init__(self, rate):
         # Store rate, we invert it as for example for dropout # of 0.1 we need success rate of 0.9
         self.rate = 1 - rate
