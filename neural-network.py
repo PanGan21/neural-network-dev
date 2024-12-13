@@ -236,6 +236,20 @@ class LossCategoricalCrossentropy(Loss):
 
 
 class LossBinaryCrossentropy(Losss):
+    """
+    Implements the Binary Cross-Entropy loss function, commonly used for binary classification tasks.
+
+    The Binary Cross-Entropy loss is defined as:
+        L = -[y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred)]
+
+    This class computes both the forward pass to calculate the loss and the backward pass 
+    to calculate the gradients of the loss with respect to the predictions.
+
+    Attributes:
+        dinputs (numpy.ndarray): The gradient of the loss with respect to the input predictions,
+                                 calculated during the backward pass.
+    """
+
     def forward(self, y_pred, y_true):
         # Clip data to prevent division by 0
         # Clip both sides to not drag mean towards any value
