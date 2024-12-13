@@ -274,6 +274,19 @@ class ActivationSoftmaxLossCategoricalCrossentropy():
 
 
 class ActivationSigmoid:
+    """
+    Implements the Sigmoid activation function, commonly used in neural networks
+    for binary classification tasks or as an activation in hidden layers.
+
+    The Sigmoid function is defined as:
+        f(x) = 1 / (1 + exp(-x))
+
+    Attributes:
+        inputs (numpy.ndarray): The input values passed to the sigmoid function during the forward pass.
+        output (numpy.ndarray): The output values computed by the sigmoid function during the forward pass.
+        dinputs (numpy.ndarray): The gradients of the loss with respect to the inputs, calculated during the backward pass.
+    """
+
     def forward(self, inputs):
         # Save input and calculate/save output of the sigmoid function
         self.inputs = inputs
