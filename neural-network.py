@@ -273,6 +273,17 @@ class ActivationSoftmaxLossCategoricalCrossentropy():
         self.dinputs = self.dinputs / samples
 
 
+class ActivationSigmoid:
+    def forward(self, inputs):
+        # Save input and calculate/save output of the sigmoid function
+        self.inputs = inputs
+        self.output = 1 / (1 + np.exp(-inputs))
+
+    def backward(self, dvalues):
+        # Derivative = calculates from output of the sigmoid function
+        self.dinputs = dvalues * (1 - self.output) * self.output
+
+
 # SGD optimizer
 class OptimizerSGD:
     """
