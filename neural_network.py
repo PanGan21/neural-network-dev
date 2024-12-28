@@ -22,7 +22,75 @@ class LayerDense:
     # Layer initialization
     def __init__(self, n_inputs, n_neurons, weight_regularizer_l1=0, weight_regularizer_l2=0, bias_regularizer_l1=0, bias_regularizer_l2=0):
         # Initialize weights and biases
-        self.weights = 0.10 * np.random.randn(n_inputs, n_neurons)
+        self.weights = 0.01 * np.random.randn(n_inputs, n_neurons)
+        self.biases = np.zeros((1, n_neurons))
+        # Set regularization strength
+        self.weight_regularizer_l1 = weight_regularizer_l1
+        self.weight_regularizer_l2 = weight_regularizer_l2
+        self.bias_regularizer_l1 = bias_regularizer_l1
+        self.bias_regularizer_l2 = bias_regularizer_l2
+
+    # Forward pass
+    def forward(self, inputs):
+        # Remember input values
+        self.inputs = inputs
+        # Calculate output values from inputs, weights and biases
+        self.output = np.dot(inputs, self.weights) + self.biases
+
+    # Backward pass
+    def backward(self, dvalues):
+        # Gradients on parameters
+        self.dweights = np.dot(self.inputs.T, dvalues)
+        self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+
+        # Gradients on regularization
+        # L1 on weights
+        if self.weight_regularizer_l1 > 0:
+            dL1 = np.ones_like(self.weights)
+            dL1[self.weights < 0] = -1
+            self.dweights += self.weight_regularizer_l1 * dL1
+
+        # L2 on weights
+        if self.weight_regularizer_l2 > 0:
+            self.dweights += 2 * self.weight_regularizer_l2 * self.weights
+
+        # L1 on biases
+        if self.bias_regularizer_l1 > 0:
+            dL1 = np.ones_like(self.biases)
+            dL1[self.biases < 0] = -1
+            self.dbiases += self.bias_regularizer_l1 * dL1
+
+        # L2 on biases
+        if self.bias_regularizer_l2 > 0:
+            self.dbiases += 2 * self.bias_regularizer_l2 * \
+                self.biases
+
+        # Gradient on values
+        self.dinputs = np.dot(dvalues, self.weights.T)
+
+
+class LayerDenseRegression:
+    """
+    Represents a fully connected (dense) layer in a neural network.
+
+    Attributes:
+        weights (ndarray): Weight matrix for the layer.
+        biases (ndarray): Bias vector for the layer.
+        inputs (ndarray): Inputs to the layer during the forward pass.
+        output (ndarray): Output of the layer during the forward pass.
+        dweights (ndarray): Gradient of weights during the backward pass.
+        dbiases (ndarray): Gradient of biases during the backward pass.
+        dinputs (ndarray): Gradient of inputs during the backward pass.
+        weight_regularizer_l1 (float): L1 regularization strength for weights.
+        weight_regularizer_l2 (float): L2 regularization strength for weights.
+        bias_regularizer_l1 (float): L1 regularization strength for biases.
+        bias_regularizer_l2 (float): L2 regularization strength for biases.
+    """
+
+    # Layer initialization
+    def __init__(self, n_inputs, n_neurons, weight_regularizer_l1=0, weight_regularizer_l2=0, bias_regularizer_l1=0, bias_regularizer_l2=0):
+        # Initialize weights and biases
+        self.weights = 0.1 * np.random.randn(n_inputs, n_neurons)
         self.biases = np.zeros((1, n_neurons))
         # Set regularization strength
         self.weight_regularizer_l1 = weight_regularizer_l1
