@@ -1,2 +1,4 @@
 numpy
 nnfs
+opencv-python
+matplotlib
