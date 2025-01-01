@@ -303,3 +303,10 @@ class Model:
         # and save parameters to it
         with open(path, 'wb') as f:
             pickle.dump(self.get_parameters(), f)
+
+    # Loads the weights and updates a model instance with them
+    def load_parameters(self, path):
+        # Open file in the binary-read mode,
+        # load weights and update trainable layers
+        with open(path, 'rb') as f:
+            self.set_parameters(pickle.load(f))
