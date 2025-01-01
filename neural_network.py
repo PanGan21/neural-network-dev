@@ -72,6 +72,11 @@ class LayerDense:
     def get_parameters(self):
         return self.weights, self.biases
 
+    # Set weights and biases in a layer instance
+    def set_parameters(self, weights, biases):
+        self.weights = weights
+        self.biases = biases
+
 
 # Input "layer"
 class LayerInput:

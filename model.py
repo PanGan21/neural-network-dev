@@ -15,12 +15,15 @@ class Model:
         self.layers.append(layer)
 
     # Set loss, optimizer and accuracy
-    def set(self, *, loss, optimizer, accuracy):
-        self.loss = loss
-        self.optimizer = optimizer
-        self.accuracy = accuracy
+    def set(self, *, loss=None, optimizer=None, accuracy=None):
+        if loss is not None:
+            self.loss = loss
+        if optimizer is not None:
+            self.optimizer = optimizer
+        if accuracy is not None:
+            self.accuracy = accuracy
 
-      # Finalize the model
+    # Finalize the model
     def finalize(self):
         # Create and set the input layer
         self.input_layer = LayerInput()
@@ -61,9 +64,10 @@ class Model:
                 self.trainable_layers.append(self.layers[i])
 
          # Update loss object with trainable layers
-        self.loss.remember_trainable_layers(
-            self.trainable_layers
-        )
+        if self.loss is not None:
+            self.loss.remember_trainable_layers(
+                self.trainable_layers
+            )
 
         # If output activation is Softmax and
         # loss function is Categorical Cross-Entropy
@@ -283,3 +287,11 @@ class Model:
 
         # Return a list
         return parameters
+
+    # Updates the model with new parameters
+    def set_parameters(self, parameters):
+        # Iterate over the parameters and layers
+        # and update each layers with each set of the parameters
+        for parameter_set, layer in zip(parameters,
+                                        self.trainable_layers):
+            layer.set_parameters(*parameter_set)
