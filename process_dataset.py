@@ -106,3 +106,5 @@ model.set_parameters(parameters)
 
 # Evaluate the model
 model.evaluate(X_test, y_test)
+
+model.save_parameters('fashion_mnist.parms')

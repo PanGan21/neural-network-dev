@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 fashion_mnist_images
 fashion_mnist_images.zip
+fashion_mnist.parms

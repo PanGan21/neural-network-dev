@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 from neural_network import LayerInput, ActivationSoftMax, LossCategoricalCrossentropy, ActivationSoftmaxLossCategoricalCrossentropy
 
 
@@ -295,3 +296,10 @@ class Model:
         for parameter_set, layer in zip(parameters,
                                         self.trainable_layers):
             layer.set_parameters(*parameter_set)
+
+    # Saves the parameters to a file
+    def save_parameters(self, path):
+        # Open a file in the binary-write mode
+        # and save parameters to it
+        with open(path, 'wb') as f:
+            pickle.dump(self.get_parameters(), f)
