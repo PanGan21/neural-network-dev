@@ -68,6 +68,10 @@ class LayerDense:
         # Gradient on values
         self.dinputs = np.dot(dvalues, self.weights.T)
 
+    # Retrieve layer parameters
+    def get_parameters(self):
+        return self.weights, self.biases
+
 
 # Input "layer"
 class LayerInput:
