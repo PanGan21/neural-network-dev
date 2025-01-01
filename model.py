@@ -76,6 +76,56 @@ class Model:
             # and loss functions
             self.softmax_classifier_output = ActivationSoftmaxLossCategoricalCrossentropy()
 
+    # Evaluates the model using passed-in dataset
+    # Default value if batch size is not being set
+    def evaluate(self, X_val, y_val, *, batch_size=None):
+        validation_steps = 1
+        # Calculate number of steps
+        if batch_size is not None:
+            validation_steps = len(X_val) // batch_size
+            # Dividing rounds down. If there are some remaining
+            # data, but not a full batch, this won't include it
+            # Add `1` to include this not full minibatch
+            if validation_steps * batch_size < len(X_val):
+                validation_steps += 1
+        # Reset accumulated values in loss
+        # and accuracy objects
+        self.loss.new_pass()
+        self.accuracy.new_pass()
+
+        # Iterate over steps
+        for step in range(validation_steps):
+            # If batch size is not set -
+            # train using one step and full dataset
+            if batch_size is None:
+                batch_X = X_val
+                batch_y = y_val
+            # Otherwise slice a batch
+            else:
+                batch_X = X_val[
+                    step*batch_size:(step+1)*batch_size
+                ]
+                batch_y = y_val[
+                    step*batch_size:(step+1)*batch_size
+                ]
+
+            # Perform the forward pass
+            # Calculate the loss
+            output = self.forward(batch_X, training=False)
+            self.loss.calculate(output, batch_y)
+            # Get predictions and calculate an accuracy
+            predictions = self.output_layer_activation.predictions(
+                output)
+            self.accuracy.calculate(predictions, batch_y)
+
+        # Get and print validation loss and accuracy
+        validation_loss = self.loss.calculate_accumulated()
+        validation_accuracy = self.accuracy.calculate_accumulated()
+
+        # Print a summary
+        print(f'validation, ' +
+              f'acc: {validation_accuracy:.3f}, ' + f'loss: {validation_loss:.3f}')
+
     # Train the model
     def train(self, X, y, *, epochs=1, batch_size=None,
               print_every=1, validation_data=None):
@@ -86,14 +136,6 @@ class Model:
         # Default value if batch size is not being set
         train_steps = 1
 
-        # If there is validation data passed,
-        # set default number of steps for validation as well
-        if validation_data is not None:
-            validation_steps = 1
-
-            # For better readability
-            X_val, y_val = validation_data
-
         # Calculate number of steps
         if batch_size is not None:
             train_steps = len(X) // batch_size
@@ -103,17 +145,9 @@ class Model:
             if train_steps * batch_size < len(X):
                 train_steps += 1
 
-            if validation_data is not None:
-                validation_steps = len(X_val) // batch_size
-
-                # Dividing rounds down. If there are some remaining
-                # data but nor full batch, this won't include it
-                # Add `1` to include this not full batch
-                if validation_steps * batch_size < len(X_val):
-                    validation_steps += 1
-
         # Main training loop
         for epoch in range(1, epochs+1):
+
             # Print epoch number
             print(f'epoch: {epoch}')
 
@@ -185,48 +219,9 @@ class Model:
             # If there is the validation data
             if validation_data is not None:
 
-                # Reset accumulated values in loss
-                # and accuracy objects
-                self.loss.new_pass()
-                self.accuracy.new_pass()
-
-                # Iterate over steps
-                for step in range(validation_steps):
-
-                    # If batch size is not set -
-                    # train using one step and full dataset
-                    if batch_size is None:
-                        batch_X = X_val
-                        batch_y = y_val
-
-                    # Otherwise slice a batch
-                    else:
-                        batch_X = X_val[
-                            step*batch_size:(step+1)*batch_size
-                        ]
-                        batch_y = y_val[
-                            step*batch_size:(step+1)*batch_size
-                        ]
-
-                    # Perform the forward pass
-                    output = self.forward(batch_X, training=False)
-
-                    # Calculate the loss
-                    self.loss.calculate(output, batch_y)
-
-                    # Get predictions and calculate an accuracy
-                    predictions = self.output_layer_activation.predictions(
-                        output)
-                    self.accuracy.calculate(predictions, batch_y)
-
-                # Get and print validation loss and accuracy
-                validation_loss = self.loss.calculate_accumulated()
-                validation_accuracy = self.accuracy.calculate_accumulated()
-
-                # Print a summary
-                print(f'validation, ' +
-                      f'acc: {validation_accuracy:.3f}, ' +
-                      f'loss: {validation_loss:.3f}')
+                # Evaluate the model:
+                self.evaluate(*validation_data,
+                              batch_size=batch_size)
 
     # Performs forward pass
     def forward(self, X, training):
