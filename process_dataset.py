@@ -75,7 +75,7 @@ model.finalize()
 # Set model with parameters instead of training it
 model.load_parameters('fashion_mnist.parms')
 
+model.save('fashion_mnist.model')
+
 # Evaluate the model
 model.evaluate(X_test, y_test)
-
-model.save('fashion_mnist.model')
