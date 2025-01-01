@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import copy
 from neural_network import LayerInput, ActivationSoftMax, LossCategoricalCrossentropy, ActivationSoftmaxLossCategoricalCrossentropy
 
 
@@ -310,3 +311,27 @@ class Model:
         # load weights and update trainable layers
         with open(path, 'rb') as f:
             self.set_parameters(pickle.load(f))
+
+    # Saves the model
+    def save(self, path):
+        # Make a deep copy of current model instance
+        model = copy.deepcopy(self)
+
+        # Reset accumulated values in loss and accuracy objects
+        model.loss.new_pass()
+        model.accuracy.new_pass()
+
+        # Remove data from input layer
+        # and gradients from the loss object
+        model.input_layer.__dict__.pop('output', None)
+        model.loss.__dict__.pop('dinputs', None)
+
+        # For each layer remove inputs, output and dinputs properties
+        for layer in model.layers:
+            for property in ['inputs', 'output', 'dinputs',
+                             'dweights', 'dbiases']:
+                layer.__dict__.pop(property, None)
+
+        # Open a file in the binary-write mode and save the model
+        with open(path, 'wb') as f:
+            pickle.dump(model, f)

@@ -163,3 +163,4 @@ cython_debug/
 fashion_mnist_images
 fashion_mnist_images.zip
 fashion_mnist.parms
+fashion_mnist.model
