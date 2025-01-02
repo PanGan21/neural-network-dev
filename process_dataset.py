@@ -52,7 +52,7 @@ fashion_mnist_labels = {
     9: 'Ankle boot'
 }
 
-image_data = cv2.imread('tshirt.png', cv2.IMREAD_GRAYSCALE)
+image_data = cv2.imread('./data/tshirt.png', cv2.IMREAD_GRAYSCALE)
 
 # Resize to the same size as Fashion MNIST images
 image_data = cv2.resize(image_data, (28, 28))
@@ -78,7 +78,7 @@ print(prediction)
 
 
 # Read an image
-image_data = cv2.imread('pants.png', cv2.IMREAD_GRAYSCALE)
+image_data = cv2.imread('./data/pants.png', cv2.IMREAD_GRAYSCALE)
 # Resize to the same size as Fashion MNIST images
 image_data = cv2.resize(image_data, (28, 28))
 # Invert image colors
