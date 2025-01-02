@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import os
@@ -38,44 +39,58 @@ def create_data_mnist(path):
     return X, y, X_test, y_test
 
 
-# Create dataset
-X, y, X_test, y_test = create_data_mnist('fashion_mnist_images')
+fashion_mnist_labels = {
+    0: 'T-shirt/top',
+    1: 'Trouser',
+    2: 'Pullover',
+    3: 'Dress',
+    4: 'Coat',
+    5: 'Sandal',
+    6: 'Shirt',
+    7: 'Sneaker',
+    8: 'Bag',
+    9: 'Ankle boot'
+}
 
-# Shuffle the training dataset
-keys = np.array(range(X.shape[0]))
-np.random.shuffle(keys)
-X = X[keys]
-y = y[keys]
+image_data = cv2.imread('tshirt.png', cv2.IMREAD_GRAYSCALE)
 
-# Flattening - Scale and reshape samples
-X = (X.reshape(X.shape[0], -1).astype(np.float32) - 127.5) / 127.5
-X_test = (X_test.reshape(X_test.shape[0], -1).astype(np.float32) -
-          127.5) / 127.5
+# Resize to the same size as Fashion MNIST images
+image_data = cv2.resize(image_data, (28, 28))
+
+# Invert image colors
+image_data = 255 - image_data
+
+# Reshape and scale pixel data
+image_data = (image_data.reshape(1, -1).astype(np.float32) - 127.5) / 127.5
+
+# Load the model
+model = Model.load('fashion_mnist.model')
+
+# Predict on the image
+predictions = model.predict(image_data)
+
+# Get prediction instead of confidence levels
+predictions = model.output_layer_activation.predictions(predictions)
+
+# Get label name from label index
+prediction = fashion_mnist_labels[predictions[0]]
+print(prediction)
 
 
-# Instantiate the model
-model = Model()
-
-# Add layers
-model.add(LayerDense(X.shape[1], 128))
-model.add(ActivationReLu())
-model.add(LayerDense(128, 128))
-model.add(ActivationReLu())
-model.add(LayerDense(128, 10))
-model.add(ActivationSoftMax())
-
-
-# Set loss, optimizer and accuracy objects
-model.set(loss=LossCategoricalCrossentropy(), optimizer=OptimizerAdam(
-    decay=1e-3), accuracy=AccuracyCategorical())
-
-# Finalize the model
-model.finalize()
-
-# Set model with parameters instead of training it
-model.load_parameters('fashion_mnist.parms')
-
-model.save('fashion_mnist.model')
-
-# Evaluate the model
-model.evaluate(X_test, y_test)
+# Read an image
+image_data = cv2.imread('pants.png', cv2.IMREAD_GRAYSCALE)
+# Resize to the same size as Fashion MNIST images
+image_data = cv2.resize(image_data, (28, 28))
+# Invert image colors
+image_data = 255 - image_data
+# Reshape and scale pixel data
+image_data = (image_data.reshape(1, -1).astype(np.float32) - 127.5) / 127.5
+# Load the model
+model = Model.load('fashion_mnist.model')
+# Predict on the image
+confidences = model.predict(image_data)
+# Get prediction instead of confidence levels
+predictions = model.output_layer_activation.predictions(confidences)
+# Get label name from label index
+prediction = fashion_mnist_labels[predictions[0]]
+print(prediction)
